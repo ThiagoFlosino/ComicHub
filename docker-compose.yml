@@ -1,0 +1,24 @@
+services:
+  claude-code:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: claude-code:latest
+    container_name: claude-code
+    volumes:
+      - ${PROJECT_PATH:-.}:/workspace
+      - claude-home:/home/developer/.claude
+      # Persiste dependências Maven entre sessões (evita baixar tudo de novo)
+      - maven-cache:/home/developer/.m2
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+volumes:
+  claude-home:
+    name: claude-code-session
+  maven-cache:
+    name: claude-code-maven-cache

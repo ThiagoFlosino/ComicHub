@@ -1,0 +1,39 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # jwk-set-uri é lazy (não busca o JWKS no startup – ideal para testes)
+          jwk-set-uri: ${COGNITO_JWKS_URI:https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/.well-known/jwks.json}
+  mvc:
+    problemdetails:
+      enabled: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/comichub}
+    username: ${SPRING_DATASOURCE_USERNAME:comichub}
+    password: ${SPRING_DATASOURCE_PASSWORD:comichub}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+google-books:
+  api:
+    base-url: ${GOOGLE_BOOKS_API_BASE_URL:https://www.googleapis.com/books/v1}
+    key: ${GOOGLE_BOOKS_API_KEY:}
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    covers-bucket: ${AWS_S3_COVERS_BUCKET:comichub-covers}
+
+localstack:
+  url: ${LOCALSTACK_URL:}

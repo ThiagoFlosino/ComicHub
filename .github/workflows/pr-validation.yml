@@ -225,6 +225,8 @@ jobs:
     name: OWASP ZAP — DAST
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      issues: write   # ZAP action cria/atualiza uma Issue com o relatório
 
     services:
       postgres:

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SpotBugs — Filtro de exclusões para o ComicHub Backend.
+
+    EI_EXPOSE_REP2: falso positivo no padrão de injeção via construtor do Spring.
+    Adaptadores e serviços recebem dependências via DI — armazená-las no campo é intencional
+    e não representa vazamento de representação interna.
+-->
+<FindBugsFilter>
+
+    <!-- Falso positivo: dependências injetadas via construtor (Spring DI) -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Package name="~com\.comichub\..*\.application\..*"/>
+            <Package name="~com\.comichub\..*\.infrastructure\..*"/>
+        </Or>
+    </Match>
+
+</FindBugsFilter>

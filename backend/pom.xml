@@ -21,6 +21,14 @@
         <java.version>21</java.version>
         <testcontainers.version>1.20.4</testcontainers.version>
         <aws.sdk.version>2.29.0</aws.sdk.version>
+        <!-- SonarQube -->
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.projectKey>comichub-backend</sonar.projectKey>
+        <sonar.projectName>ComicHub Backend</sonar.projectName>
+        <sonar.java.source>21</sonar.java.source>
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.exclusions>**/infrastructure/entity/**,**/db/migration/**</sonar.exclusions>
     </properties>
 
     <dependencyManagement>
@@ -129,6 +137,78 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- ─── JaCoCo — cobertura de testes (alimenta SonarQube) ──────── -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ─── SpotBugs + Find Security Bugs (SAST) ────────────────────── -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.6.4</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Medium</threshold>
+                    <failOnError>true</failOnError>
+                    <xmlOutput>true</xmlOutput>
+                    <excludeFilterFile>${project.basedir}/spotbugs-exclude.xml</excludeFilterFile>
+                    <plugins>
+                        <plugin>
+                            <groupId>com.h3xstream.findsecbugs</groupId>
+                            <artifactId>findsecbugs-plugin</artifactId>
+                            <version>1.13.0</version>
+                        </plugin>
+                    </plugins>
+                </configuration>
+            </plugin>
+
+            <!-- ─── OWASP Dependency-Check (SCA — CVEs nas dependências) ─────── -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>10.0.4</version>
+                <configuration>
+                    <!-- Falha o build se CVSS >= 9 (crítico) -->
+                    <failBuildOnCVSS>9</failBuildOnCVSS>
+                    <suppressionFile>${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
+                    <formats>
+                        <format>HTML</format>
+                        <format>JSON</format>
+                    </formats>
+                    <outputDirectory>${project.build.directory}/dependency-check</outputDirectory>
+                    <!-- Diretório de dados reutilizado entre builds (cache CI) -->
+                    <dataDirectory>${user.home}/.dependency-check-data</dataDirectory>
+                    <!-- Chave NVD opcional — sem ela o download é mais lento.
+                         Obtenha gratuitamente em: https://nvd.nist.gov/developers/request-an-api-key
+                         Defina via variável de ambiente: export NVD_API_KEY=sua-chave -->
+                    <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
+                </configuration>
+            </plugin>
+
+            <!-- ─── SonarQube Scanner ─────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.11.0.3922</version>
             </plugin>
         </plugins>
     </build>

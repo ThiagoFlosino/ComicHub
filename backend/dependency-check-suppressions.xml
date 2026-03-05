@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!--
+        Supressões de falsos positivos para o OWASP Dependency-Check.
+
+        Como adicionar uma supressão:
+        <suppress>
+            <notes>Falso positivo: CVE-XXXX afeta versão X.Y mas usamos Z.W (corrigida)</notes>
+            <gav regex="true">^org.example:alguma-lib:.*$</gav>
+            <cve>CVE-2023-12345</cve>
+        </suppress>
+    -->
+</suppressions>

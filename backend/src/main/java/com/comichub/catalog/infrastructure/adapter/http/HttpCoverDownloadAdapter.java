@@ -2,6 +2,7 @@ package com.comichub.catalog.infrastructure.adapter.http;
 
 import com.comichub.catalog.domain.port.out.CoverDownloadPort;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -33,7 +34,8 @@ public class HttpCoverDownloadAdapter implements CoverDownloadPort {
                 return Optional.of(response.body());
             }
             return Optional.empty();
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
             return Optional.empty();
         }
     }

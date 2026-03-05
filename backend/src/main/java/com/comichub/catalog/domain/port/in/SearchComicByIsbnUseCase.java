@@ -1,6 +1,6 @@
 package com.comichub.catalog.domain.port.in;
 
-import com.comichub.catalog.domain.model.ComicBook;
+import com.comichub.catalog.domain.model.Item;
 
 /**
  * Porta de ENTRADA (driving port) do domínio de Catálogo.
@@ -8,5 +8,5 @@ import com.comichub.catalog.domain.model.ComicBook;
  */
 public interface SearchComicByIsbnUseCase {
 
-    ComicBook execute(String isbn);
+    Item execute(String isbn);
 }

@@ -132,12 +132,18 @@ jobs:
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
+      # Chave semanal: todas as runs da semana reutilizam o mesmo cache.
+      # Somente a primeira run de cada semana faz o download incremental.
+      - name: Chave semanal para cache NVD
+        id: nvd-cache-key
+        run: echo "week=$(date +'%Y-W%V')" >> "$GITHUB_OUTPUT"
+
       - name: Cache banco de dados NVD
         if: steps.nvd-check.outputs.has_key == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.dependency-check-data
-          key: nvd-db-${{ runner.os }}-${{ github.run_id }}
+          key: nvd-db-${{ runner.os }}-${{ steps.nvd-cache-key.outputs.week }}
           restore-keys: |
             nvd-db-${{ runner.os }}-
 

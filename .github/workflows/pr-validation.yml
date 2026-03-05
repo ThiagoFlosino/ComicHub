@@ -349,13 +349,15 @@ jobs:
           target: "http://127.0.0.1:8080/api/v1"
           rules_file_name: ".zap/rules.tsv"   # suprime falsos positivos informacionais
           fail_action: true                    # falha apenas se Risk >= MEDIUM
-          cmd_options: "-a -j"                 # -a: ajax spider, -j: gera JSON
-          artifact_name: zap-report
+          cmd_options: "-j"                    # -j: JSON report (sem -a: Ajax Spider abre
+                                               # browser headless que gera alertas do Firefox CDN)
 
       - name: Upload relatório ZAP
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-report
-          path: report_html.html
+          name: zap-dast-report
+          path: |
+            report_html.html
+            report_json.json
           retention-days: 14

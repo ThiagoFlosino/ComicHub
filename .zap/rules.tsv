@@ -1,0 +1,2 @@
+10049	IGNORE	Non-Storable Content — intencional: APIs autenticadas devem ter Cache-Control: no-store
+90005	IGNORE	Sec-Fetch-* headers — enviados pelo browser, não pelo servidor; falso positivo do ZAP

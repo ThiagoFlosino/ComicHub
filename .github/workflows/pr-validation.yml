@@ -347,9 +347,9 @@ jobs:
         uses: zaproxy/action-full-scan@v0.10.0
         with:
           target: "http://127.0.0.1:8080/api/v1"
-          # Alertas >= MEDIUM falham o job. Use fail_action: false para apenas reportar.
-          fail_action: true
-          cmd_options: "-a -j" # -a: ajax spider, -j: gera JSON
+          rules_file_name: ".zap/rules.tsv"   # suprime falsos positivos informacionais
+          fail_action: true                    # falha apenas se Risk >= MEDIUM
+          cmd_options: "-a -j"                 # -a: ajax spider, -j: gera JSON
           artifact_name: zap-report
 
       - name: Upload relatório ZAP

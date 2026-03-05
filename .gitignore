@@ -38,7 +38,7 @@ logs/
 *.iml
 *.ipr
 *.iws
-out/
+/out/
 
 ##############################
 ## Visual Studio Code

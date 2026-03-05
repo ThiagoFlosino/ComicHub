@@ -164,11 +164,14 @@ jobs:
   # Gratuito para repositórios privados no GitHub.
   # Detecta: SQL Injection, XSS, path traversal, SSRF, injeção de código, etc.
   # Resultados ficam em Security → Code scanning alerts no GitHub.
+  #
+  # Workflow dedicado: .github/workflows/codeql.yml
+  # Este job executa CodeQL no contexto do pipeline de CI (sem depender do
+  # build job) usando build-mode: none (Java não exige compilação para análise).
   # ═══════════════════════════════════════════════════════════════════════════
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    needs: build
     permissions:
       security-events: write  # publicar alertas no GitHub Security
       actions: read
@@ -176,30 +179,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: temurin
-          cache: maven
 
       - name: Inicializar CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: java
+          languages: java-kotlin
+          build-mode: none          # Java não exige compilação para análise CodeQL
           queries: security-extended
-
-      - name: Compilar para CodeQL
-        working-directory: backend
-        run: mvn compile --no-transfer-progress -q
 
       - name: Executar análise CodeQL
         uses: github/codeql-action/analyze@v4
         with:
-          category: java
+          category: "/language:java-kotlin"
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Job 5 — Qualidade + SAST: SonarQube / SonarCloud

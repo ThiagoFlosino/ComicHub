@@ -7,9 +7,9 @@ on:
     branches: [develop, main]
 
 env:
-  JAVA_VERSION: '21'
-  MAVEN: /tmp/apache-maven-3.9.6/bin/mvn   # ajuste se usar setup-java com Maven embutido
-  MAVEN_OPTS: '-Xmx1g'
+  JAVA_VERSION: "21"
+  MAVEN: /tmp/apache-maven-3.9.6/bin/mvn # ajuste se usar setup-java com Maven embutido
+  MAVEN_OPTS: "-Xmx1g"
 
 # Cancela runs anteriores do mesmo PR ao receber novo push
 concurrency:
@@ -17,7 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   # ═══════════════════════════════════════════════════════════════════════════
   # Job 1 — Build + Testes + Cobertura (JaCoCo)
   # ═══════════════════════════════════════════════════════════════════════════
@@ -44,7 +43,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0       # histórico completo para SonarQube blame
+          fetch-depth: 0 # histórico completo para SonarQube blame
 
       - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -61,7 +60,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: comichub
           SPRING_DATASOURCE_PASSWORD: comichub
           AWS_REGION: us-east-1
-          LOCALSTACK_URL: http://localhost:4566   # ignorado em testes unitários
+          LOCALSTACK_URL: http://localhost:4566 # ignorado em testes unitários
 
       - name: Upload cobertura JaCoCo
         uses: actions/upload-artifact@v4
@@ -110,7 +109,7 @@ jobs:
     name: OWASP Dependency-Check
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ secrets.NVD_API_KEY != '' }}
+    if: ${{ secrets.NVD_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -281,10 +280,10 @@ jobs:
       - name: OWASP ZAP — Full Scan
         uses: zaproxy/action-full-scan@v0.10.0
         with:
-          target: 'http://127.0.0.1:8080/api/v1'
+          target: "http://127.0.0.1:8080/api/v1"
           # Alertas >= MEDIUM falham o job. Use fail_action: false para apenas reportar.
           fail_action: true
-          cmd_options: '-a -j'   # -a: ajax spider, -j: gera JSON
+          cmd_options: "-a -j" # -a: ajax spider, -j: gera JSON
           artifact_name: zap-report
 
       - name: Upload relatório ZAP

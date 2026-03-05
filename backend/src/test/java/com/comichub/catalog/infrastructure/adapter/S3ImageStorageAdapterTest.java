@@ -1,10 +1,12 @@
 package com.comichub.catalog.infrastructure.adapter;
 
+import com.comichub.AbstractIntegrationTest;
 import com.comichub.catalog.infrastructure.adapter.s3.S3ImageStorageAdapter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -12,9 +14,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
-import java.net.URI;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 /**
  * Task #003 – Teste de integração do S3ImageStorageAdapter com LocalStack.
@@ -24,20 +25,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  *   2. O Content-Type do objeto é "image/webp".
  *   3. O método retorna a chave S3 no formato "covers/{isbn}.webp".
  *
- * Usa LocalStack externo via LOCALSTACK_URL (padrão: http://host.docker.internal:4566).
+ * Usa LocalStack via Testcontainers (singleton compartilhado em AbstractIntegrationTest).
+ * Desabilitado automaticamente quando Docker não está disponível.
  */
-class S3ImageStorageAdapterTest {
+@DisabledIf("isDockerUnavailable")
+class S3ImageStorageAdapterTest extends AbstractIntegrationTest {
 
-    private static final URI LOCALSTACK_URI = URI.create(
-            System.getenv().getOrDefault("LOCALSTACK_URL", "http://host.docker.internal:4566")
-    );
     private static final String BUCKET = "comichub-covers-test";
 
     private S3Client s3Client;
     private S3ImageStorageAdapter adapter;
 
+    static boolean isDockerUnavailable() {
+        return !isDockerAvailable();
+    }
+
     @BeforeAll
     static void createBucket() {
+        if (localstack == null) return;
         try (var client = buildS3Client()) {
             client.createBucket(b -> b.bucket(BUCKET));
         } catch (S3Exception e) {
@@ -93,10 +98,10 @@ class S3ImageStorageAdapterTest {
 
     private static S3Client buildS3Client() {
         return S3Client.builder()
-                .endpointOverride(LOCALSTACK_URI)
-                .region(Region.US_EAST_1)
+                .endpointOverride(localstack.getEndpointOverride(S3))
+                .region(Region.of(localstack.getRegion()))
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create("test", "test")))
+                        AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
                 .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
                 .build();
     }

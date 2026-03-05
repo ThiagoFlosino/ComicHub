@@ -119,7 +119,21 @@ jobs:
           distribution: temurin
           cache: maven
 
+      # secrets não pode ser usado em if: — convertemos para step output
+      - name: Verificar NVD API Key
+        id: nvd-check
+        run: |
+          if [ -n "$NVD_API_KEY" ]; then
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::NVD_API_KEY não configurado — OWASP DC será pulado."
+          fi
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
       - name: Cache banco de dados NVD
+        if: steps.nvd-check.outputs.has_key == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.dependency-check-data
@@ -128,7 +142,7 @@ jobs:
             nvd-db-${{ runner.os }}-
 
       - name: OWASP Dependency-Check
-        if: ${{ secrets.NVD_API_KEY != '' }}
+        if: steps.nvd-check.outputs.has_key == 'true'
         working-directory: backend
         run: |
           mvn dependency-check:check --no-transfer-progress \

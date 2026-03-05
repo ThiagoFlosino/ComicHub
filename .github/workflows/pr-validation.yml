@@ -186,10 +186,24 @@ jobs:
       - name: Build + Test + SonarQube
         working-directory: backend
         run: |
+          # SonarCloud exige que o projeto tenha um branch padrão antes de
+          # aceitar análise de PR. Em push events fazemos branch analysis;
+          # em pull_request events passamos os metadados do PR explicitamente.
+          SONAR_EXTRA_ARGS=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            SONAR_EXTRA_ARGS="\
+              -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+              -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+              -Dsonar.pullrequest.base=${{ github.base_ref }}"
+          else
+            SONAR_EXTRA_ARGS="-Dsonar.branch.name=${{ github.ref_name }}"
+          fi
+
           mvn clean verify sonar:sonar --no-transfer-progress \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.host.url=${{ vars.SONAR_HOST_URL }} \
-            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
+            $SONAR_EXTRA_ARGS
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/comichub_test
           SPRING_DATASOURCE_USERNAME: comichub

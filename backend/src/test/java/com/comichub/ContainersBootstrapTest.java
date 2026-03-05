@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,8 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *   1. Container PostgreSQL sobe com sucesso.
  *   2. Container LocalStack sobe com sucesso.
  *   3. Flyway executa a migração V1 e cria a tabela 'items'.
+ *
+ * Requer Docker disponível. Desabilitado automaticamente sem Docker.
  */
 @SpringBootTest
+@Testcontainers(disabledWithoutDocker = true)
 class ContainersBootstrapTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -58,7 +62,36 @@ class ContainersBootstrapTest extends AbstractIntegrationTest {
                 String.class
         );
         assertThat(columns).containsExactly(
-                "id", "isbn", "title", "publisher", "series", "volume", "variant", "cover_image", "created_at"
+                "id", "isbn", "title", "publisher", "series", "volume", "variant", "cover_image", "created_at",
+                "author", "synopsis"
         );
+    }
+
+    @Test
+    void wishlistsTableShouldExist() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_name   = 'wishlists'
+                """,
+                Integer.class
+        );
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void priceHistoryTableShouldExist() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_name   = 'price_history'
+                """,
+                Integer.class
+        );
+        assertThat(count).isEqualTo(1);
     }
 }
